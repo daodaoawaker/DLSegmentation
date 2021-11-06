@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import time
 from tensorboardX import SummaryWriter
 
 from segmentron.core.config import Cfg
@@ -15,18 +16,20 @@ class Recorder:
     def __init__(self):
         assert Cfg.LOGGER_NAME == "DLSegment", "Please make sure logger's name."
         self.logger = self.set_logger()
-        self.tbWriter = SummaryWriter(Cfg.TENSORBOARD_LOG_DIR)
+        self.tbWriter = SummaryWriter(Cfg.log_dir)
 
 
     def set_logger():
-        if not os.path.exists(Cfg.OUTPUT_DIR):
-            os.makedirs(Cfg.OUTPUT_DIR)
+        if not os.path.exists(Cfg.output_dir):
+            os.makedirs(Cfg.output_dir)
 
         # 创建Logger对象
         logger = logging.getLogger(Cfg.LOGGER_NAME)
 
         # 分别为控制台和文件创建日志处理器
-        file_handler = logging.FileHandler(Cfg.OUTPUT_DIR)
+        timestamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime())
+        file_name = os.path.join(Cfg.output_dir, f'{timestamp}.log')
+        file_handler = logging.FileHandler(file_name, mode='w')
         console_handler = logging.StreamHandler(sys.stdout)
 
         # 设置输出日志的格式
