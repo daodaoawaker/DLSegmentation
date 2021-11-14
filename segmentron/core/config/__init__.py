@@ -1,1 +1,3 @@
-from .default import _C as Cfg
+from .default import _C as defaultConfig
+from .config import Opt as Opt
+from .config import UpdatedConfig as Cfg

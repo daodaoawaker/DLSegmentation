@@ -1,10 +1,15 @@
 import os
+from importlib import import_module
+
+
 import torch
 import torch.backends.cudnn as cudnn
 
 from segmentron.core.config import Cfg
 from segmentron.utils.utils import *
 from segmentron.utils.distributed import dist_init
+from segmentron.models.model_zoo import create_model
+
 
 class BaseTrainer:
     """ 
@@ -28,7 +33,7 @@ class BaseTrainer:
                 make_if_not_exists(dir)
 
         # set seed for all random number generator
-        seed_for_all_rng(self.args.seed + self.rank)
+        seed_for_all_rng(self.args.seed + self.local_rank)
 
         # initalize process group
         if self.args.distributed:
@@ -36,4 +41,11 @@ class BaseTrainer:
             cudnn.deterministic = Cfg.CUDNN.DETERMINISTIC
             cudnn.enabled = Cfg.CUDNN.ENABLED
             dist_init(self.args)
+
+    def create_meta_arch(self):
+        task_type = Cfg.TASK.TYPE.lower()
+        package_name = f'{task_type}_meta_arch'
+        package = import_module(f'segmentron.apps.{task_type}.{package_name}')
+        self.meta_arch = getattr(package, snake2pascal(package_name))()
+        self.model = create_model()
         

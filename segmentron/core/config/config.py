@@ -1,13 +1,13 @@
 import os
 import argparse
 
-from segmentron.core.config import Cfg
+from segmentron.core.config import defaultConfig
 
 
 class ConfigParse:
     def __init__(self):
         self.args = self.parse_args()
-        self.cfg = Cfg
+        self.cfg = defaultConfig
         self.update_cfg()
 
     def parse_args(self):
@@ -21,7 +21,7 @@ class ConfigParse:
                             help="random seed")
         parser.add_argument('--local_rank', type=int, default=-1,
                             help="indicate current process index")
-        parser.add_argument('--options', default=None, nargs=argparse.REMAINDER,
+        parser.add_argument('options', default=None, nargs=argparse.REMAINDER,
                             help="enable users to modify config options using command-lines")
 
         return parser.parse_args()
@@ -42,6 +42,9 @@ class ConfigParse:
 
     # def get_cfg_defaults(self):
     #     return Cfg.clone()
+
+Opt = ConfigParse()
+UpdatedConfig = Opt.cfg
 
 
 

@@ -14,12 +14,12 @@ class Recorder:
 
     """
     def __init__(self):
-        assert Cfg.LOGGER_NAME == "DLSegment", "Please make sure logger's name."
+        # assert Cfg.LOGGER_NAME == "DLSegment", "Please make sure logger's name."
         self.logger = self.set_logger()
         self.tbWriter = SummaryWriter(Cfg.log_dir)
 
 
-    def set_logger():
+    def set_logger(self,):
         if not os.path.exists(Cfg.output_dir):
             os.makedirs(Cfg.output_dir)
 
@@ -27,7 +27,7 @@ class Recorder:
         logger = logging.getLogger(Cfg.LOGGER_NAME)
 
         # 分别为控制台和文件创建日志处理器
-        timestamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime())
+        timestamp = time.strftime('%Y-%m-%d  %H-%M-%S', time.localtime())
         file_name = os.path.join(Cfg.output_dir, f'{timestamp}.log')
         file_handler = logging.FileHandler(file_name, mode='w')
         console_handler = logging.StreamHandler(sys.stdout)

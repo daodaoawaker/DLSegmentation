@@ -5,7 +5,7 @@ _C = CN()
 
 # -------------------------------------------- Basic info --------------------------------------------
 
-_C.LOGGER_NAME    = 'DLSEG'
+_C.LOGGER_NAME    = 'DLSegment'
 
 _C.project        = ''              # 创建的工程目录名
 _C.log_dir        = 'logs'
@@ -32,8 +32,10 @@ _C.TASK.TYPE = 'semantic'
 # -------------------------------------------- Model related --------------------------------------------
 
 _C.MODEL = CN()
-_C.MODEL.MODE = 'General'                        # 若为Custom，则为支持自定义网络模式(backbone/neck/head)
-_C.MODEL.NAME = ''           
+# model encoder. 其范围包含Backbone以及其他自定义的组合
+_C.MODEL.ENCODER = ''    
+# model decoder.   
+_C.MODEL.DECODER = ''
 
 
 

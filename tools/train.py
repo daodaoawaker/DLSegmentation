@@ -3,26 +3,23 @@ import torch
 from importlib import import_module
 import torch.multiprocessing as mp
 
-from segmentron.utils import ConfigParse
 from segmentron.utils.utils import *
-from segmentron.builder.trainer import *
-from segmentron.core.config import Cfg   # 更新后的总配置
+from segmentron.core.config import Opt, Cfg   # 更新后的总配置
 
 
 
 def train(proc_id, nprocs, args):
-    trainer_name = Cfg.train.trainer
-    package = import_module(trainer_name)
+    trainer_name = Cfg.TRAIN.TRAINER
+    package = import_module('segmentron.builder.trainer.' + trainer_name)
     trainer = getattr(package, snake2pascal(trainer_name))(proc_id, args)
     trainer.train()
 
 
 def main():
     # load cfg
-    opt = ConfigParse()
-    args = opt.args
+    args = Opt.args
 
-    args.nprocs = torch.cuda.deivce_count()
+    args.nprocs = torch.cuda.device_count()
     mp.spawn(train, nprocs=args.nprocs, args=[args.nprocs, args])
 
 
