@@ -20,8 +20,11 @@ class ModelBuilder(nn.Module):
     
     def get_encoder(self):
         self.encoder_name = Cfg.MODEL.ENCODER.lower()
+        self.in_ch = Cfg.TRAIN.IN_CHANNEL
+        self.num_class = Cfg.TRAIN.NUM_CLASS
+
         if self.encoder_name:
-            return get_encoder(self.encoder_name)
+            return get_encoder(self.encoder_name, in_ch=self.in_ch, num_class=self.num_class)
         return None
     
     def get_decoder(self):

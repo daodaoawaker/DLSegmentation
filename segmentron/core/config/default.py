@@ -55,6 +55,8 @@ _C.AUGMENT = CN()
 
 _C.TRAIN = CN()
 _C.TRAIN.TRAINER = 'general_trainer'
+_C.TRAIN.IN_CHANNEL = 3
+_C.TRAIN.NUM_CLASS = 2
 
 
 
