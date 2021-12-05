@@ -32,7 +32,7 @@ class BaseTrainer:
             for dir in [Cfg.log_dir, Cfg.copy_dir, Cfg.output_dir]:
                 make_if_not_exists(dir)
 
-        # set seed for all random number generator
+        # set seed for all random numbe r generator
         seed_for_all_rng(self.args.seed + self.local_rank)
 
         # initalize process group
@@ -47,5 +47,6 @@ class BaseTrainer:
         package_name = f'{task_type}_meta_arch'
         package = import_module(f'segmentron.apps.{task_type}.{package_name}')
         self.meta_arch = getattr(package, snake2pascal(package_name))()
-        self.model = create_model()
+
+        return self.meta_arch
         

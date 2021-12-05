@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 from segmentron.utils.registry import Registry
-from segmentron.models.utils import get_encoder, get_decoder
+from segmentron.models.utils import get_backbone, get_neck, get_head
 from segmentron.core.config import Cfg
 
 
@@ -14,27 +14,36 @@ MODEL_REGISTRY = Registry("MODEL")
 
 class ModelBuilder(nn.Module):
     def __init__(self,):
-        self.encoder = self.get_encoder()
-        self.decoder = self.get_decoder()
-        self.head = None
+        self.encoder = self.get_backbone()
+        self.decoder = self.get_neck()
+        self.head = self.get_head()
     
-    def get_encoder(self):
+    def get_backbone(self):
         self.encoder_name = Cfg.MODEL.ENCODER.lower()
         self.in_ch = Cfg.TRAIN.IN_CHANNEL
         self.num_class = Cfg.TRAIN.NUM_CLASS
 
         if self.encoder_name:
-            return get_encoder(self.encoder_name, in_ch=self.in_ch, num_class=self.num_class)
+            return get_backbone(self.encoder_name, in_ch=self.in_ch, num_class=self.num_class)
+        
         return None
     
-    def get_decoder(self):
+    def get_neck(self):
         self.decoder_name = Cfg.MODEL.DECODER.lower()
-        return get_decoder(self.decoder_name)
+
+        return get_neck(self.decoder_name)
+
+    def get_head(self):
+        self.head_name = Cfg.MODEL.HEAD.lower()
+
+        return get_head(self.head_name)
 
     def forward(self, x):
         if self.encoder:
-            x = self.encoder(x)
-        out = self.decoder(x)
+            out_features = self.encoder(x)
+            
+        x = self.decoder(x)
+        out = self.head(x)
 
         return out
 

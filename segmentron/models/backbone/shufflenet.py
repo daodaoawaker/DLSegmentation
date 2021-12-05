@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from segmentron.models.utils import ENCODER_REGISTRY, DECODER_REGISTRY
+from segmentron.models.utils import BACKBONE_REGISTRY
 from segmentron.core.config import Cfg
 
 
@@ -18,8 +18,7 @@ class ShuffleNet(nn.Module):
 
 
 
-@ENCODER_REGISTRY.register()
-@DECODER_REGISTRY.register()
+@BACKBONE_REGISTRY.register()
 def shufflenet(*args, **kwargs):
     model = ShuffleNet(*args, **kwargs)
     return model

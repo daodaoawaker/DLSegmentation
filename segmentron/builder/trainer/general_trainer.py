@@ -25,6 +25,7 @@ class GeneralTrainer(BaseTrainer):
 
         # ---------------------------------- create meta architeture ----------------------------------
         self.meta_arch = self.create_meta_arch()
+        self.model = self.meta_arch.model
 
         # create criterion
 
@@ -41,6 +42,6 @@ class GeneralTrainer(BaseTrainer):
     def train(self,):
         pass
 
-    def validation(self,):
+    def eval(self,):
         pass
 
