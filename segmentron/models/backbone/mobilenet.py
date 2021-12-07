@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# import os, sys
-# cur_path = os.path.abspath(os.path.dirname(__file__))
-# root_path = os.sep.join(cur_path.split(os.sep)[:-3])
-# sys.path.append(root_path)
+import os, sys
+cur_path = os.path.abspath(os.path.dirname(__file__))
+root_path = os.sep.join(cur_path.split(os.sep)[:-3])
+sys.path.append(root_path)
 
 from segmentron.models.utils import BACKBONE_REGISTRY
 from segmentron.core.config import Cfg
@@ -42,12 +42,14 @@ class MobileNetV1(nn.Module):
     cfg = [64, (128,2), 128, (256,2), 256, (512,2), 
            512, 512, 512, 512, 512, (1024,2), 1024]
 
-    def __init__(self, in_ch=3, num_class=1000, out_features_id=[7, 9, 11, 13]):
+    def __init__(self, in_ch=3, num_class=1000, used_layers=[7, 9, 11, 13]):
         super(MobileNetV1, self).__init__()
-        self.out_features_id = out_features_id
+        self.used_layers = used_layers
 
-        self.convin = ConvBNReLU(in_ch, 32, kernel_size=3, stride=2)
-        self.layers = self._make_layers(in_planes=32)
+        features = []
+        features.append(ConvBNReLU(in_ch, 32, kernel_size=3, stride=2))
+        features.extend(self._make_layers(in_planes=32))
+        self.features = features
         self.pool = nn.AvgPool2d(kernel_size=7)
         # self.pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
         self.fc = nn.Linear(1024, num_class)
@@ -60,22 +62,21 @@ class MobileNetV1(nn.Module):
             layers.append(Block(in_planes, out_planes, stride=stride))
             in_planes = out_planes
 
-        return nn.Sequential(*layers)
+        return layers
 
     def forward(self, x):
-        out_features = []
-        hx = self.convin(x)
+        outputs = []
 
-        for i, layer in enumerate(self.layers):
+        hx = x
+        for i, layer in enumerate(self.features):
             hx = layer(hx)
-            if i+1 in self.out_features_id:
-                out_features.append(hx)
-        
+            if i in self.used_layers:
+                outputs.append(hx)
         hx = self.pool(hx)
         hx = hx.view(hx.size(0), -1)
-        hx = self.fc(hx)
+        out = self.fc(hx)
 
-        return out_features
+        return outputs
 
 
 
@@ -84,9 +85,9 @@ class InvertedResidual(nn.Module):
 
     def __init__(self, in_ch, out_ch, expand_ratio=1, stride=1):
         super(InvertedResidual, self).__init__()
-        self.stride = stride
+        assert stride in [1, 2], "stride must be 1 or 2."
+        self.use_shortcut = stride == 1 and in_ch == out_ch
         mid_ch = in_ch * expand_ratio
-        self.use_shortcut = self.stride == 1 and in_ch == out_ch
 
         self.conv = nn.Sequential(
             # PW conv
@@ -111,7 +112,7 @@ class InvertedResidual(nn.Module):
 class MobileNetV2(nn.Module):
     """整个网络共54层"""
 
-    bottleneck_cfg = [
+    interverted_residual_cfg = [
         # t, c, n, s   ——> expand_ratio, out_channels, repeat_numbers, strides
         [1, 16, 1, 1],
         [6, 24, 2, 2],
@@ -122,46 +123,43 @@ class MobileNetV2(nn.Module):
         [6, 320, 1, 1]
     ]
 
-    def __init__(self, in_ch=3, num_class=1000, out_features_id=[]):
+    def __init__(self, inp=3, num_class=1000, width_mult=1., used_layers=[3, 5, 7, 9]):
         super(MobileNetV2, self).__init__()
-        self.out_features_id = out_features_id
+        self.used_layers = used_layers
+        inp_channels = make_divisible(32 * width_mult, 8)
+        oup_channels = make_divisible(1280 * max(1.0, width_mult), 8)
 
-        in_planes = 32
-        out_planes = 1280
+        features = []
+        features.append(ConvBNReLU6(inp, inp_channels, 3, 2))
+        inp_planes = inp_channels
+        for t, c, n, s in self.interverted_residual_cfg:
+            layers = []
+            oup_planes = make_divisible(c * width_mult, 8)
+            for i in range(n):
+                stride = s if i == 0 else 1
+                layers.append(InvertedResidual(inp_planes, oup_planes, t, stride))
+                inp_planes = oup_planes
+            features.append(nn.Sequential(*layers))
+        features.append(ConvBNReLU6(inp_planes, oup_channels, 1, 1))
 
-        self.convin = ConvBNReLU(in_ch, in_planes, kernel_size=3, stride=2)
-        layers = []
-        for t, c, n, s in self.bottleneck_cfg:
-            layers.extend(self._make_layers(in_planes, t, c, n, s))
-            in_planes = c
-        self.layers = nn.Sequential(*layers)
-        self.convout = ConvBNReLU(in_planes, out_planes, kernel_size=1, stride=1)
+        self.features = features
         self.pool = nn.AvgPool2d(kernel_size=7)
         # self.pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.fc = nn.Linear(out_planes, num_class)
-
-    def _make_layers(self, in_planes, t, c, n, s):
-        outputs = []
-        expand_ratio, out_planes, stride = t, c, s
-        for i in range(n):
-            stride = stride if i == 0 else 1
-            outputs.append(InvertedResidual(in_planes, out_planes, expand_ratio, stride))
-            in_planes = out_planes
-
-        return outputs
+        self.fc = nn.Linear(oup_channels, num_class)
 
     def forward(self, x):
-        hx = self.convin(x)
+        outputs =[]
 
-        for i, layer in enumerate(self.layers):
+        hx = x
+        for i, layer in enumerate(self.features):
             hx = layer(hx)
-        
-        hx = self.convout(hx)
+            if i+1 in self.used_layers:
+                outputs.append(hx)
         hx = self.pool(hx)
         hx = hx.view(hx.size(0), -1)
-        hx = self.fc(hx)
+        out = self.fc(hx)
 
-        return hx
+        return outputs
 
 
 
@@ -195,6 +193,7 @@ def mobilenetv3(*args, **kwargs):
 
 
 if __name__ == '__main__':
+
     x = torch.rand(5, 3, 224, 224)
     # model = MobileNetV1()
     model = MobileNetV2()
