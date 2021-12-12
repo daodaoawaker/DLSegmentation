@@ -2,11 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import os, sys
-cur_path = os.path.abspath(os.path.dirname(__file__))
-root_path = os.sep.join(cur_path.split(os.sep)[:-3])
-sys.path.append(root_path)
-
 from segmentron.models.utils import BACKBONE_REGISTRY
 from segmentron.core.config import Cfg
 from segmentron.models.backbone.utils import *
@@ -123,14 +118,14 @@ class MobileNetV2(nn.Module):
         [6, 320, 1, 1]
     ]
 
-    def __init__(self, inp=3, num_class=1000, width_mult=1., used_layers=[3, 5, 7, 9]):
+    def __init__(self, in_ch=3, num_class=1000, width_mult=1., used_layers=[3, 5, 7, 9]):
         super(MobileNetV2, self).__init__()
         self.used_layers = used_layers
         inp_channels = make_divisible(32 * width_mult, 8)
         oup_channels = make_divisible(1280 * max(1.0, width_mult), 8)
 
         features = []
-        features.append(ConvBNReLU6(inp, inp_channels, 3, 2))
+        features.append(ConvBNReLU6(in_ch, inp_channels, 3, 2))
         inp_planes = inp_channels
         for t, c, n, s in self.interverted_residual_cfg:
             layers = []
@@ -142,18 +137,18 @@ class MobileNetV2(nn.Module):
             features.append(nn.Sequential(*layers))
         features.append(ConvBNReLU6(inp_planes, oup_channels, 1, 1))
 
-        self.features = features
+        self.features = nn.Sequential(*features)
         self.pool = nn.AvgPool2d(kernel_size=7)
         # self.pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
         self.fc = nn.Linear(oup_channels, num_class)
 
     def forward(self, x):
-        outputs =[]
+        outputs = []
 
         hx = x
-        for i, layer in enumerate(self.features):
+        for i, layer in enumerate(self.features, 1):
             hx = layer(hx)
-            if i+1 in self.used_layers:
+            if i in self.used_layers:
                 outputs.append(hx)
         hx = self.pool(hx)
         hx = hx.view(hx.size(0), -1)

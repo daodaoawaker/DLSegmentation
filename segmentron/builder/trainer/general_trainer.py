@@ -18,7 +18,6 @@ class GeneralTrainer(BaseTrainer):
         super(GeneralTrainer, self).__init__(local_rank, args)
         self.cfg = Cfg
         
-        
         self.logger = Logger.logger
         self.tb_writer = Logger.tbWriter
         self.config_info()
@@ -28,7 +27,7 @@ class GeneralTrainer(BaseTrainer):
         self.model = self.meta_arch.model
 
         # create criterion
-
+        self.loss = None
         # optimizer
 
         # lr_scheduler

@@ -3,9 +3,9 @@ import torch
 from segmentron.utils.registry import Registry
 
 
-BACKBONE_REGISTRY = Registry("ENCODER")
-NECK_REGISTRY = Registry("DECODER")
 
+BACKBONE_REGISTRY = Registry("BACKBONE")
+NECK_REGISTRY = Registry("NECK")
 
 def get_backbone(name, **kwargs):
     model = BACKBONE_REGISTRY.get(name)(**kwargs)

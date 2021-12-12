@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 from segmentron.utils.registry import Registry
-from segmentron.models.utils import get_backbone, get_neck, get_head
+from segmentron.models.utils import get_backbone, get_neck
 from segmentron.core.config import Cfg
 
 
@@ -14,6 +14,8 @@ MODEL_REGISTRY = Registry("MODEL")
 
 class ModelBuilder(nn.Module):
     def __init__(self,):
+        super(ModelBuilder, self).__init__()
+
         self.encoder = self.get_backbone()
         self.decoder = self.get_neck()
         self.head = self.get_head()
@@ -25,22 +27,20 @@ class ModelBuilder(nn.Module):
 
         if self.encoder_name:
             return get_backbone(self.encoder_name, in_ch=self.in_ch, num_class=self.num_class)
-        
         return None
     
     def get_neck(self):
         self.decoder_name = Cfg.MODEL.DECODER.lower()
-
         return get_neck(self.decoder_name)
 
     def get_head(self):
-        self.head_name = Cfg.MODEL.HEAD.lower()
-
-        return get_head(self.head_name)
+        # self.head_name = Cfg.MODEL.HEAD.lower()
+        # return get_head(self.head_name)
+        return nn.Identity()
 
     def forward(self, x):
         if self.encoder:
-            out_features = self.encoder(x)
+            x = self.encoder(x)
             
         x = self.decoder(x)
         out = self.head(x)

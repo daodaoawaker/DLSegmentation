@@ -41,6 +41,13 @@ class MutiResolutionFusion(nn.Module):
 
     def forward(self, *xs):
         out = self.conv0(xs[0])
+        if self.scale_factors[0] != 1:
+            out = F.interpolate(
+                out,
+                scale_factor=self.scale_factors[0],
+                mode='bilinear',
+                align_corners=True)
+
         for i, x in enumerate(xs[1:], 1):
             x = getattr(self, f'conv{i}')(x)
             if self.scale_factors[i] != 1:
@@ -54,8 +61,26 @@ class MutiResolutionFusion(nn.Module):
         return out
 
 class ChainedResidualPool(nn.Module):
-    pass
+    def __init__(self, inp_ch):
+        super(ChainedResidualPool, self).__init__()
 
+        self.relu = nn.ReLU(inplace=True)
+        for i in range(1, 4):
+            self.add_module(
+                f'branch{i}', 
+                nn.Sequential(
+                    nn.MaxPool2d(kernel_size=5, stride=1, padding=2),
+                    nn.Conv2d(inp_ch, inp_ch, 3, 1, 1, bias=False)))
+    
+    def forward(self, x):
+        out = self.relu(x)
+        branch = out
+
+        for i in range(1, 4):
+            branch = getattr(self, f'branch{i}')(branch)
+            out += branch
+
+        return out
 
 
 class RefinenetBlock(nn.Module):
@@ -73,21 +98,31 @@ class RefinenetBlock(nn.Module):
                 代表输入的每个特征图的通道数和宽高尺寸
         """
         super(RefinenetBlock, self).__init__()
-        self.RCU = RCU
-        self.MRF = MRF
-        self.CRP = CRP
 
         num_features = len(dim_of_features)
         for i in range(num_features):
             in_channel, in_size = dim_of_features[i]
 
-            double_rcu = [self.RCU(in_channel), self.RCU(in_channel)]
-            self.add_module(f'rcu_{i}', nn.Sequential(*double_rcu))
+            double_rcu = [RCU(in_channel), RCU(in_channel)]
+            self.add_module(f'rcu{i}', nn.Sequential(*double_rcu))
         
         if num_features > 1:
-            self.mrf = self.MRF(oup_ch, *dim_of_features)
+            self.mrf = MRF(oup_ch, *dim_of_features)
         else:
             self.mrf = None
+        
+        self.crp = CRP(oup_ch)
+        self.conv = RCU(oup_ch)
 
     def forward(self, *xs):
-        pass
+        out = []
+        for i, x in enumerate(xs):
+            out.append(getattr(self, f'rcu{i}')(x))
+        
+        if self.mrf is not None:
+            out = self.mrf(out)
+        
+        out = self.crp(out)
+        out = self.conv(out)
+
+        return out    

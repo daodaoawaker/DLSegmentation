@@ -7,7 +7,7 @@ from segmentron.core.config import defaultConfig
 class ConfigParse:
     def __init__(self):
         self.args = self.parse_args()
-        self.cfg = defaultConfig
+        self.cfg = defaultConfig.clone()
         self.update_cfg()
 
     def parse_args(self):
@@ -40,8 +40,9 @@ class ConfigParse:
 
         cfg.freeze()
 
-    # def get_cfg_defaults(self):
-    #     return Cfg.clone()
+    def get_cfg_defaults(self):
+        return defaultConfig.clone()
+
 
 Opt = ConfigParse()
 UpdatedConfig = Opt.cfg
