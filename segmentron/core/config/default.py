@@ -1,4 +1,4 @@
-from  yacs.config import CfgNode as CN
+from yacs.config import CfgNode as CN
 
 
 _C = CN()
@@ -42,13 +42,19 @@ _C.MODEL.DECODER = ''
 # -------------------------------------------- Dataset related --------------------------------------------
 
 _C.DATASET = CN()
+_C.DATASET.DATASET = ''
+_C.DATASET.TRAIN_SET = CN()
+_C.DATASET.VALID_SET = CN()
+
+_C.DATASET.AUGMENT = CN()
 
 
+# -------------------------------------------- Input related --------------------------------------------
 
-# -------------------------------------------- Dataset augment --------------------------------------------
-
-_C.AUGMENT = CN()
-
+_C.INPUT = CN()
+_C.INPUT.SIZE = 224
+_C.INPUT.MEAN = [0.0, 0.0, 0.0]
+_C.INPUT.STD = [1.0, 1.0, 1.0]
 
 
 # -------------------------------------------- Train related --------------------------------------------

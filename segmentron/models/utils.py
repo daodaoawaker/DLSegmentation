@@ -1,5 +1,3 @@
-import torch
-
 from segmentron.utils.registry import Registry
 
 

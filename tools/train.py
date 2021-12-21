@@ -4,7 +4,7 @@ from importlib import import_module
 import torch.multiprocessing as mp
 
 from segmentron.utils.utils import *
-from segmentron.core.config import Opt, Cfg   # 更新后的总配置
+from segmentron.core.config import Opt, Cfg
 
 
 

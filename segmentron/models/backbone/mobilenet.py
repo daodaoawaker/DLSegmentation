@@ -74,7 +74,6 @@ class MobileNetV1(nn.Module):
         return outputs
 
 
-
 class InvertedResidual(nn.Module):
     """MobileNetV2中的linear bottleneck，作者称之为Inverted Residuals结构，同时使用到了resnet中的shortcut结构"""
 
@@ -155,7 +154,6 @@ class MobileNetV2(nn.Module):
         out = self.fc(hx)
 
         return outputs
-
 
 
 class MobileNetV3(nn.Module):
