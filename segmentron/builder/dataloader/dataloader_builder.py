@@ -4,6 +4,7 @@ from torch.utils import data
 from torch.utils.data import DataLoader, dataloader
 
 from segmentron.core.config import Cfg
+from segmentron.datasets
 
 
 
@@ -14,19 +15,6 @@ class DataloaderBuilder:
         self.cfg = Cfg
         self.batch_size = batch_size
 
-    def _get_dataset(self, mode='Train'):
-        m_name = f'{Cfg.TASK.TYPE}_dataset'
-        c_name = f'{Cfg.TASK.TYPE.tile()}Dataset'
-        package_module = import_module('segmentron.apps.' + m_name)
-        dataset = getattr(package_module, c_name)(mode)
-
-        return dataset
-
-    def _build_dataloader(self, dataset, mode='Train'):
-        dataloader = DataLoader(dataset)
-
-        return dataloader
-
     def train_dataloader(self,):
         train_dataset = self._get_dataset(mode='Train')
         train_loader = self._build_dataloader(train_dataset, mode='Train')
@@ -35,7 +23,28 @@ class DataloaderBuilder:
 
     def valid_dataloader(self,):
         pass
+    
+    def test_dataloader(self,):
+        pass
 
     def calib_dataloader(self,):
         pass
+
+    def _get_dataset(self, mode='Train'):
+        module_name = f'{Cfg.TASK.TYPE}_dataset'
+        class_name = f'{Cfg.TASK.TYPE.tile()}Dataset'
+        package_module = import_module('segmentron.apps.' + module_name)
+        augment_class = self._get_transform(mode=mode)
+        dataset_class = getattr(package_module, class_name)(augment_class, mode)
+
+        return dataset_class
+
+    def _get_transform(self, mode='Train'):
+        augment_class = None
+        return augment_class
+
+    def _build_dataloader(self, dataset, mode='Train'):
+        dataloader = DataLoader(dataset)
+
+        return dataloader
     

@@ -9,8 +9,8 @@ _C.LOGGER_NAME    = 'DLSegment'
 
 _C.project        = ''              # 创建的工程目录名
 _C.log_dir        = 'logs'
-_C.output_dir     = 'output'
 _C.copy_dir       = 'copy'
+_C.output_dir     = 'output'
 
 
 
@@ -42,10 +42,19 @@ _C.MODEL.DECODER = ''
 # -------------------------------------------- Dataset related --------------------------------------------
 
 _C.DATASET = CN()
+_C.DATASET.ROOT_DIR = ''
 _C.DATASET.DATASET = ''
-_C.DATASET.TRAIN_SET = CN()
-_C.DATASET.VALID_SET = CN()
 
+_C.DATASET.TRAINSET = CN()
+_C.DATASET.TRAINSET.NAMES = ()
+
+_C.DATASET.VALIDSET = CN()
+_C.DATASET.VALIDSET.NAMES = ()
+
+_C.DATASET.TESTSET = CN()
+_C.DATASET.TESTSET.NAMES = ()
+
+# ----- Augment -----
 _C.DATASET.AUGMENT = CN()
 
 
