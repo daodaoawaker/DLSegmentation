@@ -12,7 +12,7 @@ _C.log_dir        = 'logs'
 _C.copy_dir       = 'copy'
 _C.output_dir     = 'output'
 
-
+_C.WORKERS = 4
 
 # -------------------------------------------- Cudnn related --------------------------------------------
 
@@ -73,11 +73,16 @@ _C.TRAIN.TRAINER = 'general_trainer'
 _C.TRAIN.IN_CHANNEL = 3
 _C.TRAIN.NUM_CLASS = 2
 
+_C.TRAIN.BATCH_SIZE_PER_GPU = 16
+_C.TRAIN.SHUFFLE = False
+
 
 
 # -------------------------------------------- Test related --------------------------------------------
 
-_C.TEST = CN()
+_C.VALID = CN()
+
+_C.VALID.BATCH_SIZE_PER_GPU = 16
 
 
 

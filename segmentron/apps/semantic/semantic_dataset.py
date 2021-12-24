@@ -9,12 +9,11 @@ from segmentron.core.config import Cfg
 
 
 class SemanticDataset(BaseDataset):
-    """"""
+    """语义分割Dataset类"""
 
-    def __init__(self, transform, mode):
+    def __init__(self, transform=None, mode='Train'):
         super(SemanticDataset, self).__init__(transform=transform, mode=mode, mean=Cfg.INPUT.MEAN, std=Cfg.INPUT.STD)
-        dataset = mode.upper()
-        self.cfg = eval(f'Cfg.DATASET.{dataset}')
+        self.cfg = eval(f'Cfg.DATASET.{mode.upper()}SET')
         self.root = Cfg.DATASET.ROOT_DIR
 
         for dataset in self.cfg.NAMES:
@@ -71,4 +70,16 @@ class SemanticDataset(BaseDataset):
         return samples
 
     def generate_sample(self, image, label):
+        if self.transform is not None:
+            image, label = self.transform(image, label)
+
+
+class SemanticAugment:
+    """语义数据增强类"""
+
+    def __init__(self,):
         pass
+
+    def __call__(self, image, label):
+
+        return image, label

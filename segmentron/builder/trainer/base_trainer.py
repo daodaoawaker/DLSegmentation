@@ -10,6 +10,8 @@ from segmentron.core.config import Cfg
 from segmentron.utils.utils import *
 from segmentron.utils.distributed import dist_init
 from segmentron.builder.dataloader import DataloaderBuilder
+from segmentron.builder.optimizer import get_optimizer
+from segmentron.builder.scheduler import get_lr_scheduler
 
 
 
@@ -25,23 +27,24 @@ class BaseTrainer:
         self.num_gpus = args.nprocs
         self.local_rank = local_rank
         self.device = torch.device(f'cuda:{args.local_rank}')
-
+        # 配置信息
         self.default_setup()
         self.config_info()
-
+        # 网络相关
         self.meta_arch = self.create_meta_arch()
         self.model = self.meta_arch.model
-
-        self.dataloader = DataloaderBuilder()
+        # 数据相关
+        self.dataloader = DataloaderBuilder(args)
         self.train_dataloader = self.dataloader.train_dataloader()
         self.valid_dataloader = self.dataloader.valid_dataloader()
         self.calib_dataloader = self.dataloader.calib_dataloader()
-
-
         # optimizer
+        self.optimizer = get_optimizer()
         # lr_scheduler
+        self.lr_scheduler = get_lr_scheduler()
 
-    
+
+
     def default_setup(self):
         # make directory if not exist
         if self.local_rank == 0:
@@ -50,7 +53,6 @@ class BaseTrainer:
 
         # set seed for all random numbe r generator
         seed_for_all_rng(self.args.seed + self.local_rank)
-
         # initalize process group
         if self.args.distributed:
             cudnn.benchmark = Cfg.CUDNN.BENCHMARK

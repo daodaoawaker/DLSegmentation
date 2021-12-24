@@ -1,29 +1,35 @@
 import torch
 from importlib import import_module
-from torch.utils import data
-from torch.utils.data import DataLoader, dataloader
+from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 from segmentron.core.config import Cfg
-from segmentron.datasets
 
 
 
 class DataloaderBuilder:
     """数据加载器类"""
 
-    def  __init__(self, batch_size):
+    def  __init__(self, args):
         self.cfg = Cfg
-        self.batch_size = batch_size
+        self.args = args
 
     def train_dataloader(self,):
-        train_dataset = self._get_dataset(mode='Train')
-        train_loader = self._build_dataloader(train_dataset, mode='Train')
+        self.train_bs = Cfg.TRAIN.BATCH_SIZE_PER_GPU
+        self.train_dataset = self._get_dataset(mode='Train')
+        self.train_sampler = self._get_sampler(mode='Train')
+        self.train_loader = self._build_dataloader(mode='Train')
 
-        return train_loader
+        return self.train_loader
 
     def valid_dataloader(self,):
-        pass
-    
+        self.valid_bs = Cfg.VALID.BATCH_SIZE_PER_GPU
+        self.valid_dataset = self._get_dataset(mode='Valid')
+        self.valid_sampler = self._get_sampler(mode='Valid')
+        self.valid_loader = self._build_dataloader(mode='Valid')
+
+        return self.valid_loader
+
     def test_dataloader(self,):
         pass
 
@@ -31,20 +37,45 @@ class DataloaderBuilder:
         pass
 
     def _get_dataset(self, mode='Train'):
-        module_name = f'{Cfg.TASK.TYPE}_dataset'
-        class_name = f'{Cfg.TASK.TYPE.tile()}Dataset'
+        module_name = f'{Cfg.TASK.TYPE}'
+        dataset_name = f'{Cfg.TASK.TYPE.tile()}Dataset'
+        augment_name = f'{Cfg.TASK.TYPE.tile()}Augment'
         package_module = import_module('segmentron.apps.' + module_name)
-        augment_class = self._get_transform(mode=mode)
-        dataset_class = getattr(package_module, class_name)(augment_class, mode)
+        augment_class = import_module('segmentron.apps.' + augment_name)
+        dataset_class = getattr(package_module, dataset_name)(augment_class, mode)
 
         return dataset_class
 
-    def _get_transform(self, mode='Train'):
-        augment_class = None
-        return augment_class
+    def _get_sampler(self, mode='Train'):
+        sampler = None
+        if self.args.distributed:
+            if mode == 'Train':
+                sampler = DistributedSampler(self.train_dataset)
+            if mode == 'Valid':
+                sampler = DistributedSampler(self.valid_dataset)
 
-    def _build_dataloader(self, dataset, mode='Train'):
-        dataloader = DataLoader(dataset)
+        return sampler
+
+    def _build_dataloader(self, mode='Train'):
+        dataloader = None
+        if mode == 'Train':
+            dataloader = DataLoader(self.train_dataset,
+                                    batch_size=self.train_bs,
+                                    shuffle=Cfg.TRAIN.SHUFFLE and self.train_sampler is None,
+                                    num_workers=Cfg.WORKERS,
+                                    pin_memory=True,
+                                    sampler=self.train_sampler)
+        if mode == 'Valid':
+            dataloader = DataLoader(self.valid_dataset,
+                                    batch_size=self.valid_bs,
+                                    shuffle=False,
+                                    num_workers=Cfg.WORKERS,
+                                    pin_memory=True,
+                                    sampler=self.valid_sampler)
+        if mode == 'Test':
+            pass
+        if mode == 'Calib':
+            pass
 
         return dataloader
-    
+
