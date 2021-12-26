@@ -4,8 +4,5 @@ from segmentron.core.config import Cfg
 
 
 
-def get_optimizer():
-    optimizer = None
-
-    return optimizer
+SGDOptimizer = torch.optim.SGD()
 

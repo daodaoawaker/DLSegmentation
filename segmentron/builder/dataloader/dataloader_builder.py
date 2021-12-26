@@ -41,7 +41,7 @@ class DataloaderBuilder:
         dataset_name = f'{Cfg.TASK.TYPE.tile()}Dataset'
         augment_name = f'{Cfg.TASK.TYPE.tile()}Augment'
         package_module = import_module('segmentron.apps.' + module_name)
-        augment_class = import_module('segmentron.apps.' + augment_name)
+        augment_class = getattr(package_module, augment_name)()  # ？？给什么参数
         dataset_class = getattr(package_module, dataset_name)(augment_class, mode)
 
         return dataset_class

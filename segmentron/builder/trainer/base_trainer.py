@@ -10,6 +10,7 @@ from segmentron.core.config import Cfg
 from segmentron.utils.utils import *
 from segmentron.utils.distributed import dist_init
 from segmentron.builder.dataloader import DataloaderBuilder
+from segmentron.builder.loss import get_loss
 from segmentron.builder.optimizer import get_optimizer
 from segmentron.builder.scheduler import get_lr_scheduler
 
@@ -30,18 +31,21 @@ class BaseTrainer:
         # 配置信息
         self.default_setup()
         self.config_info()
-        # 网络相关
-        self.meta_arch = self.create_meta_arch()
-        self.model = self.meta_arch.model
+
         # 数据相关
         self.dataloader = DataloaderBuilder(args)
         self.train_dataloader = self.dataloader.train_dataloader()
         self.valid_dataloader = self.dataloader.valid_dataloader()
         self.calib_dataloader = self.dataloader.calib_dataloader()
+        # 网络相关
+        self.meta_arch = self.create_meta_arch()
+        self.model = self.meta_arch.model
+        # loss
+        self.criterion = get_loss(self.model)
         # optimizer
-        self.optimizer = get_optimizer()
+        self.optimizer = get_optimizer(self.model)
         # lr_scheduler
-        self.lr_scheduler = get_lr_scheduler()
+        self.lr_scheduler = get_lr_scheduler(self.model)
 
 
 
@@ -68,9 +72,9 @@ class BaseTrainer:
 
     def create_meta_arch(self):
         task_type = Cfg.TASK.TYPE.lower()
-        package_name = f'{task_type}_meta_arch'
-        package = import_module(f'segmentron.apps.{task_type}.{package_name}')
-        meta_arch = getattr(package, snake2pascal(package_name))()
+        module_name = f'{task_type}_meta_arch'
+        package_module = import_module(f'segmentron.apps.{task_type}.{module_name}')
+        meta_arch = getattr(package_module, snake2pascal(module_name))()
 
         return meta_arch
         
