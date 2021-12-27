@@ -4,13 +4,13 @@ import torch.distributed as dist
 from segmentron.core.config import Cfg
 
 
+
 def dist_init(args):
-    torch.cuda.set_device(args.device)
-    dist.init_process_group(backend='nccl', init_method=Cfg.DIST.INIT_METHOD,
-                            world_size=args.nprocs, rank=args.local_rank)
-    # dist.init_process_group(backend='gloo', init_method=Cfg.DIST.INIT_METHOD,
-    #                         world_size=args.nprocs, rank=args.local_rank)
-    
+    torch.cuda.set_device(args.local_rank)
+    # dist.init_process_group(backend='nccl', init_method=Cfg.DIST.INIT_METHOD,
+    #                           world_size=args.nprocs, rank=args.local_rank)
+    dist.init_process_group(backend='gloo', init_method=Cfg.DIST.INIT_METHOD,
+                                world_size=args.nprocs, rank=args.local_rank)
     synchronize()
 
 

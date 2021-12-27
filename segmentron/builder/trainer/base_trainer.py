@@ -8,6 +8,7 @@ import torch.backends.cudnn as cudnn
 
 from segmentron.core.config import Cfg
 from segmentron.utils.utils import *
+from segmentron.utils.logger import Logger
 from segmentron.utils.distributed import dist_init
 from segmentron.builder.dataloader import DataloaderBuilder
 from segmentron.builder.loss import get_loss
@@ -28,16 +29,19 @@ class BaseTrainer:
         self.num_gpus = args.nprocs
         self.local_rank = local_rank
         self.device = torch.device(f'cuda:{args.local_rank}')
+        self.logger = Logger.logger
+        self.tb_writer = Logger.tbWriter
+
         # 配置信息
         self.default_setup()
         self.config_info()
 
-        # 数据相关
+        # data
         self.dataloader = DataloaderBuilder(args)
         self.train_dataloader = self.dataloader.train_dataloader()
         self.valid_dataloader = self.dataloader.valid_dataloader()
         self.calib_dataloader = self.dataloader.calib_dataloader()
-        # 网络相关
+        # network
         self.meta_arch = self.create_meta_arch()
         self.model = self.meta_arch.model
         # loss

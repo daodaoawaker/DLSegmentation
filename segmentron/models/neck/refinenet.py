@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# from segmentron.models.utils import NECK_REGISTRY
+from segmentron.models.utils import NECK_REGISTRY
 from .utils.refinenet_blocks import RefinenetBlock, ResidualConvUnit
 from .utils.modules_helper import *
 
@@ -59,8 +59,7 @@ class RefineNet(nn.Module):
         return output
 
 
-
-# @NECK_REGISTRY.register()
+@NECK_REGISTRY.register()
 def refinenet(*args, **kwargs):
     model = RefineNet()
     
