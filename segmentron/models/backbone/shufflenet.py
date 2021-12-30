@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from segmentron.models.utils import BACKBONE_REGISTRY
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
 
 

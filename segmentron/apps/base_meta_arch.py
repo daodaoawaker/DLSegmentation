@@ -1,6 +1,6 @@
 
 
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 from segmentron.models.model_zoo import create_model
 
 

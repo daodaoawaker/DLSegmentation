@@ -1,5 +1,7 @@
-# from .optimizer_builder import SGDOptimizer
+import torch
+import torch.nn as nn
 
+from segmentron.core import Cfg
 
 
 def _get_parameters(model):
@@ -7,6 +9,7 @@ def _get_parameters(model):
 
 
 def get_optimizer(model):
-    optimizer = None
+    name = Cfg.OPTIMIZER.NAME.lower()
 
-    return optimizer
+    if name == 'sgd':
+        return torch.optim.SGD(model.parameters(), lr=Cfg.OPTIMIZER.LR)

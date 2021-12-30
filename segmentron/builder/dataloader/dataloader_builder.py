@@ -3,7 +3,7 @@ from importlib import import_module
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
 
 
@@ -38,8 +38,8 @@ class DataloaderBuilder:
 
     def _get_dataset(self, mode='Train'):
         module_name = f'{Cfg.TASK.TYPE}'
-        dataset_name = f'{Cfg.TASK.TYPE.tile()}Dataset'
-        augment_name = f'{Cfg.TASK.TYPE.tile()}Augment'
+        dataset_name = f'{Cfg.TASK.TYPE.title()}Dataset'
+        augment_name = f'{Cfg.TASK.TYPE.title()}Augment'
         package_module = import_module('segmentron.apps.' + module_name)
         augment_class = getattr(package_module, augment_name)()  # ？？给什么参数
         dataset_class = getattr(package_module, dataset_name)(augment_class, mode)

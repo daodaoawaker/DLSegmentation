@@ -4,7 +4,7 @@ import logging
 import time
 from tensorboardX import SummaryWriter
 
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
 
 

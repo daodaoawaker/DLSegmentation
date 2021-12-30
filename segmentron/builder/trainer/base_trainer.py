@@ -6,7 +6,7 @@ from importlib import import_module
 import torch
 import torch.backends.cudnn as cudnn
 
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 from segmentron.utils.utils import *
 from segmentron.utils.logger import Logger
 from segmentron.utils.distributed import dist_init
@@ -35,12 +35,11 @@ class BaseTrainer:
         # 配置信息
         self.default_setup()
         self.config_info()
-
         # data
-        self.dataloader = DataloaderBuilder(args)
-        self.train_dataloader = self.dataloader.train_dataloader()
-        self.valid_dataloader = self.dataloader.valid_dataloader()
-        self.calib_dataloader = self.dataloader.calib_dataloader()
+        # self.dataloader = DataloaderBuilder(args)
+        # self.train_dataloader = self.dataloader.train_dataloader()
+        # self.valid_dataloader = self.dataloader.valid_dataloader()
+        # self.calib_dataloader = self.dataloader.calib_dataloader()
         # network
         self.meta_arch = self.create_meta_arch()
         self.model = self.meta_arch.model
@@ -50,7 +49,6 @@ class BaseTrainer:
         self.optimizer = get_optimizer(self.model)
         # lr_scheduler
         self.lr_scheduler = get_lr_scheduler(self.model)
-
 
 
     def default_setup(self):

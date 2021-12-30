@@ -1,16 +1,10 @@
 from enum import Enum
-
 import torch
 import torch.nn as nn
 
-from segmentron.utils.registry import Registry
 from segmentron.models.utils import get_backbone, get_neck
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
-
-
-# 模型注册表
-MODEL_REGISTRY = Registry("MODEL")
 
 
 class ModelBuilder(nn.Module):

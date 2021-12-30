@@ -4,7 +4,7 @@ from importlib import import_module
 import torch.multiprocessing as mp
 
 from segmentron.utils.utils import *
-from segmentron.core.config import Opt, Cfg
+from segmentron.core import Opt, Cfg
 
 
 

@@ -2,7 +2,7 @@
 
 
 from segmentron.apps import BaseMetaArch
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
 
 

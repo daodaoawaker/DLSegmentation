@@ -1,7 +1,7 @@
 import torch
 
 import torch.distributed as dist
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
 
 

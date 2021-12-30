@@ -1,8 +1,10 @@
-from .loss import CrossEntropy, DiceLoss
+from segmentron.core import Cfg
+from .loss import CrossEntropy
 
 
 
-def get_loss(model):
-     loss = None
+def get_loss(model, **kwargs):
+     loss_name = Cfg.LOSS.NAME.lower()
 
-     return loss
+     if loss_name == 'crossentropy':
+          return CrossEntropy(**kwargs)

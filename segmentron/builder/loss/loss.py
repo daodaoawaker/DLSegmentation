@@ -10,6 +10,7 @@ class CrossEntropy(nn.Module):
     
     def forward(self, *inputs):
         preds, targets = tuple(inputs)
+        return nn.CrossEntropyLoss(preds, targets)
 
 
 class DiceLoss(nn.Module):
@@ -18,10 +19,3 @@ class DiceLoss(nn.Module):
 
     def forward(self, *inputs):
         preds, targets = tuple(inputs)
-
-
-
-
-torch.nn.CrossEntropyLoss()
-torch.nn.BCELoss()
-torch.nn.BCEWithLogitsLoss()

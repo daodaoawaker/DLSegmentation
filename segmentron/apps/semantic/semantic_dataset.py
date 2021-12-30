@@ -4,7 +4,7 @@ import numpy as np
 
 from segmentron.datasets import BaseDataset
 from segmentron.datasets.utils import *
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 
 
 

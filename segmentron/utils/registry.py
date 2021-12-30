@@ -23,12 +23,8 @@ class Registry:
             def decorate(func_or_class):
                 if self.name is None:
                     self.name = func_or_class.__name__
-                @wraps
-                def wrapper(*args, **kwargs):
-                    self._register(self.name, func_or_class)
-                    return func_or_class(*args, **kwargs)
-                    
-                return wrapper
+                self._register(self.name, func_or_class)
+                return func_or_class
             
             return decorate
 

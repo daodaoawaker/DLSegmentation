@@ -1,7 +1,7 @@
 from importlib import import_module
 
 from segmentron.builder.trainer import BaseTrainer
-from segmentron.core.config import Cfg
+from segmentron.core import Cfg
 from segmentron.utils.utils import snake2pascal
 
 
