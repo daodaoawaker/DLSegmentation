@@ -2,7 +2,6 @@ import os
 import pprint
 from importlib import import_module
 
-
 import torch
 import torch.backends.cudnn as cudnn
 
@@ -28,27 +27,34 @@ class BaseTrainer:
         self.args = args
         self.num_gpus = args.nprocs
         self.local_rank = local_rank
-        self.device = torch.device(f'cuda:{args.local_rank}')
         self.logger = Logger.logger
         self.tb_writer = Logger.tbWriter
 
-        # 配置信息
+        # ---------- prepare
         self.default_setup()
         self.config_info()
-        # data
-        # self.dataloader = DataloaderBuilder(args)
-        # self.train_dataloader = self.dataloader.train_dataloader()
-        # self.valid_dataloader = self.dataloader.valid_dataloader()
-        # self.calib_dataloader = self.dataloader.calib_dataloader()
-        # network
-        self.meta_arch = self.create_meta_arch()
+        
+        # ---------- dataloader
+        self.dataloader = DataloaderBuilder(self.args)
+        self.train_dataloader = self.dataloader.train_dataloader()
+        self.valid_dataloader = self.dataloader.valid_dataloader()
+        self.calib_dataloader = self.dataloader.calib_dataloader()
+
+        # ---------- network && loss
+        self.meta_arch = self._create_meta_arch()
         self.model = self.meta_arch.model
-        # loss
         self.criterion = get_loss(self.model)
-        # optimizer
+        self._model_emit()
+
+        # ---------- optimizer && lr_scheduler
         self.optimizer = get_optimizer(self.model)
-        # lr_scheduler
-        self.lr_scheduler = get_lr_scheduler(self.model)
+        self.scheduler = get_lr_scheduler(self.optimizer)
+
+        self.last_epoch = 0
+        self.end_epoch = Cfg.TRAIN.END_EPOCH
+        self.iters_per_epoch = len(self.train_dataloader.dataset) / Cfg.TRAIN.BATCH_SIZE_PER_GPU / self.num_gpus
+
+        # ---------- resume
 
 
     def default_setup(self):
@@ -72,11 +78,31 @@ class BaseTrainer:
             self.logger.info(pprint.pformat(self.args))
             self.logger.info(Cfg)
 
-    def create_meta_arch(self):
+    def _create_meta_arch(self):
         task_type = Cfg.TASK.TYPE.lower()
         module_name = f'{task_type}_meta_arch'
         package_module = import_module(f'segmentron.apps.{task_type}.{module_name}')
         meta_arch = getattr(package_module, snake2pascal(module_name))()
 
         return meta_arch
-        
+
+    def _model_emit(self):
+        """model distribute"""
+        model = self.model
+        self.device = torch.device(f'cuda:{self.local_rank}')
+
+        if self.args.distributed:
+            # DDP
+            model = model.to(self.device)
+            model = torch.nn.parallel.DistributedDataParallel(
+                model,
+                find_unused_parameters=True,
+                device_ids=[self.local_rank],
+                output_device=self.local_rank
+            )
+        else:
+            # DP
+            model = torch.nn.DataParallel(model, device_ids=list(range(self.num_gpus))).cuda()
+
+        self.model = model
+

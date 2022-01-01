@@ -31,8 +31,13 @@ class SemanticDataset(BaseDataset):
 
         if 'Test' == self.mode:
             image = self.input_transform(img_rgb)
-
-            return image.copy(), np.array(shape), name
+            sample = {
+                'image': image.copy(), 
+                'shape': np.array(shape),
+                'name': name
+            }
+            
+            return sample
         
         label_path = item['label_path']
         label = load_label(label_path)

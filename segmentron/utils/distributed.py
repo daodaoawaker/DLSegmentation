@@ -1,15 +1,15 @@
 import torch
 
-import torch.distributed as dist
+import torch.distributed as torch_dist
 from segmentron.core import Cfg
 
 
 
 def dist_init(args):
     torch.cuda.set_device(args.local_rank)
-    # dist.init_process_group(backend='nccl', init_method=Cfg.DIST.INIT_METHOD,
+    # torch_dist.init_process_group(backend='nccl', init_method=Cfg.DIST.INIT_METHOD,
     #                           world_size=args.nprocs, rank=args.local_rank)
-    dist.init_process_group(backend='gloo', init_method=Cfg.DIST.INIT_METHOD,
+    torch_dist.init_process_group(backend='gloo', init_method=Cfg.DIST.INIT_METHOD,
                                 world_size=args.nprocs, rank=args.local_rank)
     synchronize()
 
@@ -19,11 +19,16 @@ def synchronize():   # ???
     Helper function to synchronize (barrier) among all processes when
     using distributed training
     """
-    if not dist.is_available():
+    if not torch_dist.is_available():
         return
-    if not dist.is_initialized():
+    if not torch_dist.is_initialized():
         return
-    world_size = dist.get_world_size()
+    world_size = torch_dist.get_world_size()
     if world_size == 1:
         return
-    dist.barrier()
+    torch_dist.barrier()
+
+
+def is_initialized():
+    return torch_dist.is_initialized()
+

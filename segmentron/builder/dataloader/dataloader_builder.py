@@ -13,9 +13,13 @@ class DataloaderBuilder:
     def  __init__(self, args):
         self.cfg = Cfg
         self.args = args
+        self.num_gpus = args.nprocs
+        # only consider DP or DDP
+        self.batch_size = Cfg.TRAIN.BATCH_SIZE_PER_GPU if self.args.distributed \
+                                    else Cfg.TRAIN.BATCH_SIZE_PER_GPU * self.num_gpus
 
     def train_dataloader(self,):
-        self.train_bs = Cfg.TRAIN.BATCH_SIZE_PER_GPU
+        self.train_bs = self.batch_size
         self.train_dataset = self._get_dataset(mode='Train')
         self.train_sampler = self._get_sampler(mode='Train')
         self.train_loader = self._build_dataloader(mode='Train')
@@ -23,7 +27,7 @@ class DataloaderBuilder:
         return self.train_loader
 
     def valid_dataloader(self,):
-        self.valid_bs = Cfg.VALID.BATCH_SIZE_PER_GPU
+        self.valid_bs = self.batch_size
         self.valid_dataset = self._get_dataset(mode='Valid')
         self.valid_sampler = self._get_sampler(mode='Valid')
         self.valid_loader = self._build_dataloader(mode='Valid')

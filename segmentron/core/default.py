@@ -33,6 +33,9 @@ _C.MODEL.ENCODER = ''
 # model decoder.   
 _C.MODEL.DECODER = ''
 
+_C.MODEL.IN_CHANNEL = 3
+_C.MODEL.NUM_CLASS = 2
+
 # -------------------------------------------- Dataset related --------------------------------------------
 
 _C.DATASET = CN()
@@ -66,22 +69,22 @@ _C.LOSS.CLASS_BALANCE = False
 _C.LOSS.BALANCE_WEIGHTS = [1]
 _C.LOSS.USE_OHEM = False
 
-# ------------------------------------------ Optimizer related ------------------------------------------
-
-_C.OPTIMIZER = CN()
-_C.OPTIMIZER.NAME = ''
-
-_C.OPTIMIZER.LR = 1e-4
-
 # -------------------------------------------- Train related --------------------------------------------
 
 _C.TRAIN = CN()
 _C.TRAIN.TRAINER = 'general_trainer'
-_C.TRAIN.IN_CHANNEL = 3
-_C.TRAIN.NUM_CLASS = 2
+_C.TRAIN.END_EPOCH = 300
+
 
 _C.TRAIN.BATCH_SIZE_PER_GPU = 16
 _C.TRAIN.SHUFFLE = False
+
+_C.TRAIN.OPTIMIZER = CN(new_allowed=True)
+_C.TRAIN.OPTIMIZER.NAME = ''
+_C.TRAIN.OPTIMIZER.LR = 1e-4
+
+_C.TRAIN.LR_SCHEDULER = CN(new_allowed=True)
+_C.TRAIN.LR_SCHEDULER.NAME = ''
 
 # -------------------------------------------- Valid related --------------------------------------------
 
@@ -93,5 +96,3 @@ _C.VALID.BATCH_SIZE_PER_GPU = 16
 
 _C.DIST = CN()
 _C.DIST.INIT_METHOD = 'tcp://127.0.0.1:05032'
-
-

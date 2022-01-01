@@ -17,8 +17,8 @@ class ModelBuilder(nn.Module):
     
     def _get_backbone(self):
         self.encoder_name = Cfg.MODEL.ENCODER.lower()
-        self.in_ch = Cfg.TRAIN.IN_CHANNEL
-        self.num_class = Cfg.TRAIN.NUM_CLASS
+        self.in_ch = Cfg.MODEL.IN_CHANNEL
+        self.num_class = Cfg.MODEL.NUM_CLASS
 
         if self.encoder_name:
             return get_backbone(self.encoder_name, in_ch=self.in_ch, num_class=self.num_class)
