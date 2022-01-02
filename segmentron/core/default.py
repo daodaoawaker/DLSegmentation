@@ -7,6 +7,8 @@ _C = CN()
 
 _C.LOGGER_NAME    = 'DLSegment'
 _C.WORKERS = 4
+_C.LOG_FREQ = 300
+_C.PRINT_FREQ = 20
 
 _C.project        = ''              # 创建的工程目录名
 _C.log_dir        = 'logs'

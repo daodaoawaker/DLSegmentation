@@ -4,10 +4,11 @@ from importlib import import_module
 
 import torch
 import torch.backends.cudnn as cudnn
+from torch.nn import parallel
 
-from segmentron.core import Cfg
+from segmentron.core import Cfg, get_metric
 from segmentron.utils.utils import *
-from segmentron.utils.logger import Logger
+from segmentron.utils.logger import Recorder
 from segmentron.utils.distributed import dist_init
 from segmentron.builder.dataloader import DataloaderBuilder
 from segmentron.builder.loss import get_loss
@@ -27,34 +28,42 @@ class BaseTrainer:
         self.args = args
         self.num_gpus = args.nprocs
         self.local_rank = local_rank
-        self.logger = Logger.logger
-        self.tb_writer = Logger.tbWriter
+        self.recorder = Recorder(self.args)
+        self.logger = self.recorder.logger
 
         # ---------- prepare
         self.default_setup()
         self.config_info()
-        
         # ---------- dataloader
         self.dataloader = DataloaderBuilder(self.args)
         self.train_dataloader = self.dataloader.train_dataloader()
         self.valid_dataloader = self.dataloader.valid_dataloader()
         self.calib_dataloader = self.dataloader.calib_dataloader()
-
         # ---------- network && loss
         self.meta_arch = self._create_meta_arch()
         self.model = self.meta_arch.model
         self.criterion = get_loss(self.model)
-        self._model_emit()
-
+        self.train_loss = 0.0
+        self.valid_loss = 0.0
         # ---------- optimizer && lr_scheduler
         self.optimizer = get_optimizer(self.model)
         self.scheduler = get_lr_scheduler(self.optimizer)
-
+        # ---------- train iteration related
         self.last_epoch = 0
         self.end_epoch = Cfg.TRAIN.END_EPOCH
         self.iters_per_epoch = len(self.train_dataloader.dataset) / Cfg.TRAIN.BATCH_SIZE_PER_GPU / self.num_gpus
-
+        self.cur_epoch = 0
+        self.cur_iters = 0
+        self.epochs = 0
+        self.iters = 0
         # ---------- resume
+
+        # ---------- model distribute
+        self._model_emit()
+        # ---------- metric
+        self.metric = get_metric(self.args)
+        self.mean_score = 0.0
+        self.best_score = 0.0
 
 
     def default_setup(self):
@@ -90,10 +99,10 @@ class BaseTrainer:
         """model distribute"""
         model = self.model
         self.device = torch.device(f'cuda:{self.local_rank}')
+        model = model.to(self.device)
 
         if self.args.distributed:
             # DDP
-            model = model.to(self.device)
             model = torch.nn.parallel.DistributedDataParallel(
                 model,
                 find_unused_parameters=True,
@@ -102,7 +111,28 @@ class BaseTrainer:
             )
         else:
             # DP
-            model = torch.nn.DataParallel(model, device_ids=list(range(self.num_gpus))).cuda()
+            model = torch.nn.DataParallel(model, device_ids=list(range(self.num_gpus)))
 
         self.model = model
 
+    def _save_checkpoint(self):
+        save_file = f'epoch_{self.cur_epoch}_{self.cur_iters % self.iters_per_epoch:05d}.pth'
+        save_path = os.path.join(Cfg.output_dir, save_file)
+        self.logger.info(f'==> saving checkpoint to {save_path}')
+        # saving of every epoch 
+        torch.save({
+            'epoch': self.cur_epoch,
+            'optimizer': self.optimizer.state_dict(),
+            'state_dict': self.model.state_dict() if isinstance(self.model, torch.nn.DataParallel) \
+                            else self.model.module.state_dict()
+        })
+        # saving of best pth
+        if self.mean_score > self.best_score:
+            self.best_score = self.mean_score
+            copy_path = os.path.join(Cfg.copy_dir, 'best.pth')
+            model_state_dict = self.model.state_dict() if isinstance(self.model, torch.nn.DataParallel) \
+                                    else self.model.module.state_dict()
+            torch.save(model_state_dict, copy_path)
+        
+        msg = f'Loss: {self.valid_loss}, MeanScore: {self.mean_score}, BestScore: {self.best_score}'
+        self.logger.info(msg)

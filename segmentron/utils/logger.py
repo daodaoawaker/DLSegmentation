@@ -13,10 +13,11 @@ class Recorder:
     分别记录程序运行时产生的日志信息和模型训练时需要记录在tensorboard中的一些中间变量信息
 
     """
-    def __init__(self):
+    def __init__(self, args):
         # assert Cfg.LOGGER_NAME == "DLSegment", "Please make sure logger's name."
+        self.args = args
         self.logger = self.set_logger()
-        self.tbWriter = SummaryWriter(Cfg.log_dir)
+        self.tbWriter = SummaryWriter(Cfg.log_dir) if args.local_rank == 0 else None
 
 
     def set_logger(self,):
@@ -48,18 +49,14 @@ class Recorder:
 
         return logger
     
-    def scalar_summary(self,):
-        # TODO
-        self.tbWriter.add_scalar()
+    def scalar_summary(self, name, scalar_value, global_step):
+        if self.tbWriter is not None:
+            self.tbWriter.add_scalar(name, scalar_value, global_step)
 
     def scalar_list_summary(self, ):
-        # TODO
-        pass
+        if self.tbWriter is not None:
+            pass
 
-    def image_summary(self,):
-        # TODO
-        self.tbWriter.add_image()
-
-
-
-Logger = Recorder()
+    def image_summary(self, name, item_value, global_step):
+        if self.tbWriter is not None:
+            self.tbWriter.add_image()

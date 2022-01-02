@@ -32,3 +32,9 @@ def synchronize():   # ???
 def is_initialized():
     return torch_dist.is_initialized()
 
+
+def get_world_size():
+    if not torch_dist.is_initialized():
+        return 1
+    return torch_dist.get_world_size()
+
