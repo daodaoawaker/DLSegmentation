@@ -1,6 +1,6 @@
 import torch
 
-from segmentron.core import Cfg
+from segmentron.config import Cfg
 
 
 

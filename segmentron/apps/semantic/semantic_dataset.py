@@ -2,9 +2,9 @@ import os
 import torch
 import numpy as np
 
-from segmentron.datasets import BaseDataset
-from segmentron.datasets.utils import *
-from segmentron.core import Cfg
+from segmentron.data import BaseDataset
+from segmentron.data.utils import *
+from segmentron.config import Cfg
 
 
 

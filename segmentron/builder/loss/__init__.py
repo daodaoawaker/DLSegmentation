@@ -1,4 +1,4 @@
-from segmentron.core import Cfg
+from segmentron.config import Cfg
 from .loss import CrossEntropy
 
 

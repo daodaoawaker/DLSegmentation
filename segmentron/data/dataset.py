@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 
-from segmentron.core import Cfg
+from segmentron.config import Cfg
 
 
 

@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from segmentron.core import defaultConfig
+from segmentron.config import defaultConfig
 
 
 class ConfigParse:

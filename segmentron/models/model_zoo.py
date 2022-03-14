@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 from segmentron.models.utils import get_backbone, get_neck
-from segmentron.core import Cfg
+from segmentron.config import Cfg
 
 
 

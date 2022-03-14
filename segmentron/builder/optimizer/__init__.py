@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from segmentron.core import Cfg
+from segmentron.config import Cfg
 
 
 def _get_parameters(model):

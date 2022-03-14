@@ -4,7 +4,7 @@ from importlib import import_module
 from segmentron.builder.trainer import BaseTrainer
 from segmentron.utils.utils import *
 from segmentron.utils import distributed as dist
-from segmentron.core import Cfg
+from segmentron.config import Cfg
 
 
 
@@ -96,9 +96,10 @@ class GeneralTrainer(BaseTrainer):
                 avg_loss.update(reduced_loss.item())
                 self.valid_loss = avg_loss.average()
 
-                # TODO
-                score = self.metric()
-        
+                score = self.metric(preds, labels)
+                self.logger.info(f"[Eval]: Score of sample {i_iter} is {score}")
+
+
         self.mean_score = self.metric.get()
         if self.local_rank == 0:
             self.recorder.scalar_summary('valid_loss', self.valid_loss, self.cur_iters)

@@ -4,7 +4,8 @@ import logging
 import time
 from tensorboardX import SummaryWriter
 
-from segmentron.core import Cfg
+from tools.main import args
+from segmentron.config import Cfg
 
 
 
@@ -60,3 +61,6 @@ class Recorder:
     def image_summary(self, name, item_value, global_step):
         if self.tbWriter is not None:
             self.tbWriter.add_image()
+
+
+recorder = Recorder(args)
