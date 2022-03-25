@@ -10,7 +10,11 @@ from segmentron.config import Opt, Cfg
 
 def train(proc_id, args):
     trainer_name = Cfg.TRAIN.TRAINER
-    package = import_module('segmentron.builder.trainer.' + trainer_name)
+    if 'general' in trainer_name:
+        package = import_module(f'segmentron.builder.trainer.{trainer_name}')
+    else:
+        package = import_module(f'segmentron.builder.trainer.apps.{Cfg.TASK.TYPE}.{trainer_name}')
+    
     trainer = getattr(package, snake2pascal(trainer_name))(proc_id, args)
     trainer.train()
 

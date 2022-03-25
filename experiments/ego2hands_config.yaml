@@ -1,0 +1,34 @@
+
+
+
+# --------------------------- MODEL ---------------------------
+MODEL:
+  DECODER: CSM
+  INPUT_EDGE: true
+  WITH_ENERGY: true
+  NUM_CLASSES: 3
+
+LOSS:
+  NAME:
+  - CrossEntropy
+  - MSE
+
+DATASET:
+  TYPE: custom
+  NAME: Ego2Hands
+  ROOT_DIR: F:\VSCode_Projects\DeepLearning_Workspace\AAA_Practice\data
+  TRAINSET:
+    NAMES:
+    - train
+  VALIDSET:
+    NAMES:
+    - valid
+
+INPUT:
+  IMAGE_SIZE: [512, 512]
+
+AUGMENT:
+  CROP_SIZE: [512, 512]
+
+TRAIN:
+  TRAINER: Ego2Hands

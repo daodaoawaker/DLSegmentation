@@ -76,7 +76,7 @@ class GeneralTrainer(BaseTrainer):
         self.model.train()
         
         if self.local_rank == 0:
-            self._save_checkpoint()
+            self.save_checkpoint()
 
     def _valid(self,):
         self.model.eval()

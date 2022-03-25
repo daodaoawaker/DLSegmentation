@@ -41,12 +41,22 @@ class DataloaderBuilder:
         pass
 
     def _get_dataset(self, mode='Train'):
-        module_name = f'{Cfg.TASK.TYPE}'
-        dataset_name = f'{Cfg.TASK.TYPE.title()}Dataset'
-        augment_name = f'{Cfg.TASK.TYPE.title()}Augment'
-        package_module = import_module('segmentron.apps.' + module_name)
-        augment_class = getattr(package_module, augment_name)()  # ？？给什么参数
-        dataset_class = getattr(package_module, dataset_name)(augment_class, mode)
+        dataset_type = Cfg.DATASET.TYPE
+
+        if dataset_type == "general":
+            module_name = Cfg.TASK.TYPE
+            dataset_name = f'{Cfg.TASK.TYPE.title()}Dataset'
+            augment_name = f'{Cfg.TASK.TYPE.title()}Augment'
+            package_module = import_module('segmentron.apps.' + module_name)
+            augment_class = getattr(package_module, augment_name)(mode)
+            dataset_class = getattr(package_module, dataset_name)(augment_class, mode)
+
+        elif dataset_type == "custom":
+            dataset_name = f'{Cfg.DATASET.NAME}Data'
+            augment_name = f'{Cfg.DATASET.NAME}Augment'
+            package_module = import_module('segmentron.data.dataloader')
+            augment_class = getattr(package_module, augment_name)(mode)
+            dataset_class = getattr(package_module, dataset_name)(augment_class, mode)
 
         return dataset_class
 

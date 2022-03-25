@@ -1,3 +1,4 @@
+from tkinter.tix import Tree
 from yacs.config import CfgNode as CN
 
 
@@ -24,48 +25,51 @@ _C.CUDNN.ENABLED = True
 
 # -------------------------------------------- Task related --------------------------------------------
 
-_C.TASK = CN()
+_C.TASK = CN(new_allowed=True)
 _C.TASK.TYPE = 'semantic'
 
 # -------------------------------------------- Model related --------------------------------------------
 
-_C.MODEL = CN()
+_C.MODEL = CN(new_allowed=True)
 # model encoder. 其范围包含Backbone以及其他自定义的组合
 _C.MODEL.ENCODER = ''    
 # model decoder.   
 _C.MODEL.DECODER = ''
+# model head
+_C.MODEL.HEAD = ''
 
 _C.MODEL.IN_CHANNEL = 3
-_C.MODEL.NUM_CLASS = 2
+_C.MODEL.NUM_CLASSES = 2
 
 # -------------------------------------------- Dataset related --------------------------------------------
 
-_C.DATASET = CN()
+_C.DATASET = CN(new_allowed=True)
+_C.DATASET.TYPE = 'general'
+_C.DATASET.NAME = ''
 _C.DATASET.ROOT_DIR = ''
-_C.DATASET.DATASET = ''
 
-_C.DATASET.TRAINSET = CN()
+_C.DATASET.TRAINSET = CN(new_allowed=True)
 _C.DATASET.TRAINSET.NAMES = ()
 
-_C.DATASET.VALIDSET = CN()
+_C.DATASET.VALIDSET = CN(new_allowed=True)
 _C.DATASET.VALIDSET.NAMES = ()
 
-_C.DATASET.TESTSET = CN()
+_C.DATASET.TESTSET = CN(new_allowed=True)
 _C.DATASET.TESTSET.NAMES = ()
 
 # ----- Augment -----
-_C.DATASET.AUGMENT = CN()
+_C.AUGMENT = CN(new_allowed=True)
 
 # -------------------------------------------- Input related --------------------------------------------
 
-_C.INPUT = CN()
-_C.INPUT.SIZE = 224
+_C.INPUT = CN(new_allowed=True)
+_C.INPUT.IMAGE_SIZE = [224, 224]
 _C.INPUT.MEAN = [0.0, 0.0, 0.0]
-_C.INPUT.STD = [1.0, 1.0, 1.0]
+_C.INPUT.STD = 1.0
 
 # -------------------------------------------- Loss related --------------------------------------------
 
-_C.LOSS = CN()
+_C.LOSS = CN(new_allowed=True)
 _C.LOSS.NAME = ''
 _C.LOSS.CLASS_BALANCE = False
 _C.LOSS.BALANCE_WEIGHTS = [1]
@@ -73,8 +77,8 @@ _C.LOSS.USE_OHEM = False
 
 # -------------------------------------------- Train related --------------------------------------------
 
-_C.TRAIN = CN()
-_C.TRAIN.TRAINER = 'general_trainer'
+_C.TRAIN = CN(new_allowed=True)
+_C.TRAIN.TRAINER = 'general'
 _C.TRAIN.END_EPOCH = 300
 
 
@@ -90,11 +94,10 @@ _C.TRAIN.LR_SCHEDULER.NAME = ''
 
 # -------------------------------------------- Valid related --------------------------------------------
 
-_C.VALID = CN()
-
+_C.VALID = CN(new_allowed=True)
 _C.VALID.BATCH_SIZE_PER_GPU = 16
 
 # ------------------------------------------ Distributed related ------------------------------------------
 
-_C.DIST = CN()
+_C.DIST = CN(new_allowed=True)
 _C.DIST.INIT_METHOD = 'tcp://127.0.0.1:05032'

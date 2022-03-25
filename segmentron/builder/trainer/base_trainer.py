@@ -43,7 +43,7 @@ class BaseTrainer:
         self.calib_dataloader = self.dataloader.calib_dataloader()
 
         # ---------- network && loss
-        self.meta_arch = self._create_meta_arch()
+        self.meta_arch = self.create_meta_arch()
         self.model = self.meta_arch.model
         self.criterion = get_loss(self.model)
         self.train_loss = 0.0
@@ -94,7 +94,7 @@ class BaseTrainer:
             self.logger.info(pprint.pformat(self.args))
             self.logger.info(Cfg)
 
-    def _create_meta_arch(self):
+    def create_meta_arch(self):
         task_type = Cfg.TASK.TYPE.lower()
         module_name = f'{task_type}_meta_arch'
         package_module = import_module(f'segmentron.apps.{task_type}.{module_name}')
@@ -122,7 +122,7 @@ class BaseTrainer:
 
         self.model = model
 
-    def _save_checkpoint(self):
+    def save_checkpoint(self):
         save_file = f'epoch_{self.cur_epoch}_{self.cur_iters % self.iters_per_epoch:05d}.pth'
         save_path = os.path.join(Cfg.output_dir, save_file)
         self.logger.info(f'==> saving checkpoint to {save_path}')
