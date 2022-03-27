@@ -7,6 +7,7 @@ from segmentron.data import BaseDataset
 from segmentron.data.utils import *
 from segmentron.data.augment import *
 from segmentron.config import Cfg
+from .Ego2Hands_utils import *
 
 
 
@@ -39,6 +40,7 @@ class Ego2HandsData(BaseDataset):
         left_energy = ReScale(input_size, cv2.INTER_NEAREST)(left_energy)
         left_energy = Flip('Horizontal')(left_energy)
 
+        left_img, left_seg, left_energy = random_translation(left_img, left_seg, left_energy)
 
 
         image, label = self.generate_sample(left_src, left_seg)

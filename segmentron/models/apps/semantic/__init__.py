@@ -1,1 +1,1 @@
-from .ego2hands import csm
+from .Ego2Hands import csm
