@@ -1,6 +1,5 @@
 
 
-
 # --------------------------- MODEL ---------------------------
 MODEL:
   DECODER: CSM
@@ -23,12 +22,14 @@ DATASET:
   VALIDSET:
     NAMES:
     - valid
+  BACKGROUND: backgrounds
 
 INPUT:
-  IMAGE_SIZE: [512, 512]
+  IMAGE_SIZE: [288, 512]
 
 AUGMENT:
-  CROP_SIZE: [512, 512]
+  CROP_SIZE: [288, 512]
+  BRIGHTNESS_MODE: "normal" #[dark, normal, bright]
 
 TRAIN:
   TRAINER: Ego2Hands
