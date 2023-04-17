@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from segmentron.models.utils import BACKBONE_REGISTRY
+from segmentron.models.build import BACKBONE_REGISTRY
 from segmentron.config import Cfg
 from segmentron.models.backbone.utils import *
 
@@ -165,7 +165,6 @@ class MobileNetV3(nn.Module):
 
 
 
-
 @BACKBONE_REGISTRY.register()
 def mobilenetv1(*args, **kwargs):
     model = MobileNetV1(*args, **kwargs)
@@ -188,6 +187,7 @@ def mobilenetv3(*args, **kwargs):
 if __name__ == '__main__':
 
     x = torch.rand(5, 3, 224, 224)
+
     # model = MobileNetV1()
     model = MobileNetV2()
     

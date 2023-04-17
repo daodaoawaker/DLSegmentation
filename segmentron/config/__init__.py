@@ -1,4 +1,4 @@
-from .default import _C as defaultConfig
-from .config import Opt as Opt
-from .config import UpdatedConfig as Cfg
-from .score import get_metric
+from .default import _C as defaultCfg
+
+from .config import Opt
+from .config import _Cfg as Cfg

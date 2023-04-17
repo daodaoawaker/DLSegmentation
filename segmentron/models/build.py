@@ -1,7 +1,6 @@
 from segmentron.utils.registry import Registry
 
 
-
 BACKBONE_REGISTRY = Registry("BACKBONE")
 NECK_REGISTRY = Registry("NECK")
 

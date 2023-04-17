@@ -6,7 +6,6 @@ from torch.utils.data.distributed import DistributedSampler
 from segmentron.config import Cfg
 
 
-
 class DataloaderBuilder:
     """数据加载器类"""
 
@@ -37,7 +36,7 @@ class DataloaderBuilder:
     def test_dataloader(self,):
         pass
 
-    def calib_dataloader(self,):
+    def cali_dataloader(self,):
         pass
 
     def _get_dataset(self, mode='Train'):

@@ -1,8 +1,6 @@
 import torch
-
 import torch.distributed as torch_dist
 from segmentron.config import Cfg
-
 
 
 def dist_init(args):

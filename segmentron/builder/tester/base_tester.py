@@ -1,0 +1,4 @@
+
+
+class BaseTester:
+    pass

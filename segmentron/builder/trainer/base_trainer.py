@@ -6,8 +6,9 @@ from importlib import import_module
 import torch
 import torch.backends.cudnn as cudnn
 
+from tools import snake2pascal
 from segmentron.utils.utils import *
-from segmentron.utils.logger import recorder
+from segmentron.utils.logger import Recorder
 from segmentron.utils.distributed import dist_init
 from segmentron.data import DataloaderBuilder
 from segmentron.builder.loss import get_loss
@@ -17,12 +18,13 @@ from segmentron.builder.scheduler import get_lr_scheduler
 from segmentron.config import Cfg
 
 
-
 logger = logging.getLogger(Cfg.LOGGER_NAME)
 
 class BaseTrainer:
-    """ 
-    训练器的基类，一般将训练过程中比较通用的方法放置于此实现
+    r"""Base class for train pipeline.
+
+    There are the implementation of the general methods and attributes related to train.
+
     """
     def __init__(self, local_rank, args):
         args.local_rank = local_rank
@@ -31,54 +33,49 @@ class BaseTrainer:
         self.args = args
         self.num_gpus = args.nprocs
         self.local_rank = local_rank
-        self.recorder = recorder
-        self.logger = self.recorder.logger
-        self.default_setup()
-        self.config_info()
 
-        # ---------- dataloader
+        self.recorder = Recorder(args)
+        self.logger = self.recorder.logger
+
+        self.setup()
+        self.cfg_info()
+
+        # Model
+        self.meta_arch()
+        self.train_loss = 0.0
+        self.valid_loss = 0.0
+        self.criterion = get_loss(self.model)
+        # Data
         self.dataloader = DataloaderBuilder(self.args)
         self.train_dataloader = self.dataloader.train_dataloader()
         self.valid_dataloader = self.dataloader.valid_dataloader()
-        self.calib_dataloader = self.dataloader.calib_dataloader()
-
-        # ---------- network && loss
-        self.meta_arch = self.create_meta_arch()
-        self.model = self.meta_arch.model
-        self.criterion = get_loss(self.model)
-        self.train_loss = 0.0
-        self.valid_loss = 0.0
-
-        # ---------- optimizer && lr_scheduler
+        self.cali_dataloader = self.dataloader.cali_dataloader()
+        self.test_dataloader = self.dataloader.test_dataloader()
+        # Optimizer | lr_scheduler
         self.optimizer = get_optimizer(self.model)
         self.scheduler = get_lr_scheduler(self.optimizer)
+        # Resume
 
-        # ---------- resume
-
-        # ---------- model distribute
+        # Distribution
         self.model_dist()
-
-        # ---------- metric
+        # Metric
         self.metric = get_metric(self.args)
         self.mean_score = 0.0
         self.best_score = 0.0
-
-        # ---------- train iteration related
+        # Others
         self.iters = 0
         self.epochs = 0
         self.cur_epoch = 0
         self.cur_iters = 0
         self.last_epoch = 0
         self.end_epoch = Cfg.TRAIN.END_EPOCH
-        self.iters_per_epoch = \
-            len(self.train_dataloader.dataset) / Cfg.TRAIN.BATCH_SIZE_PER_GPU / self.num_gpus
+        self.iters_per_epoch = len(self.train_dataloader.dataset) // Cfg.TRAIN.BATCH_SIZE_PER_GPU // self.num_gpus
 
-    def default_setup(self):
+    def setup(self):
         # make directory if not exist
         if self.local_rank == 0:
             for dir in [Cfg.log_dir, Cfg.copy_dir, Cfg.output_dir]:
                 make_if_not_exists(dir)
-
         # set seed for all random numbe r generator
         seed_for_all_rng(self.args.seed + self.local_rank)
         # initalize process group
@@ -88,19 +85,20 @@ class BaseTrainer:
             cudnn.enabled = Cfg.CUDNN.ENABLED
             dist_init(self.args)
 
-    def config_info(self):
+    def cfg_info(self):
         if self.local_rank == 0:
             self.logger.info(f"Using {self.num_gpus} GPUs.")
             self.logger.info(pprint.pformat(self.args))
             self.logger.info(Cfg)
 
-    def create_meta_arch(self):
-        task_type = Cfg.TASK.TYPE.lower()
+    def meta_arch(self):
+        task_type = self.args.task.lower()
         module_name = f'{task_type}_meta_arch'
-        package_module = import_module(f'segmentron.apps.{task_type}.{module_name}')
-        meta_arch = getattr(package_module, snake2pascal(module_name))()
+        package = import_module(f'segmentron.apps.{task_type}.{module_name}')
+        meta_arch = getattr(package, snake2pascal(module_name))()
 
-        return meta_arch
+        self._meta_arch = meta_arch
+        self.model = meta_arch.model
 
     def model_dist(self):
         """model distribute"""

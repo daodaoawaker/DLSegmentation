@@ -5,7 +5,6 @@ from segmentron.apps import BaseMetaArch
 from segmentron.config import Cfg
 
 
-
 class SemanticMetaArch(BaseMetaArch):
     def __init__(self):
         super(SemanticMetaArch, self).__init__()

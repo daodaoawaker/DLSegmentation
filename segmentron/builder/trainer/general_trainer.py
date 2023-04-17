@@ -7,12 +7,9 @@ from segmentron.utils import distributed as dist
 from segmentron.config import Cfg
 
 
-
 class GeneralTrainer(BaseTrainer):
-    """
-    Model Trainer
-    
-    """
+    """Model Trainer"""
+
     def __init__(self, local_rank, args):
         super(GeneralTrainer, self).__init__(local_rank, args)
         self.cfg = Cfg

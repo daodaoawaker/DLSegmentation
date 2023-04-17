@@ -2,9 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from segmentron.models.utils import NECK_REGISTRY
+from segmentron.models.build import NECK_REGISTRY
 from .modules_helper.ego2hands_utils import Bottleneck, DeconvBottleneck
-
 
 
 class CSM(nn.Module):

@@ -4,7 +4,6 @@ from segmentron.config import Cfg
 from segmentron.models.model_zoo import create_model
 
 
-
 class BaseMetaArch:
     def __init__(self, ):
         self.cfg = Cfg

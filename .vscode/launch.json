@@ -11,8 +11,9 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--project", "E:\\ZooProjects\\Projects",
-                "--config", "E:\\ZooProjects\\Projects\\base_cfg.yaml"
+                "train",
+                "--project", "F:\\Workspace\\ZooPlayground\\projects",
+                "--config", "experiments\\config.yaml"
             ]
         }
     ]

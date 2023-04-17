@@ -1,4 +1,3 @@
-from tkinter.tix import Tree
 from yacs.config import CfgNode as CN
 
 
@@ -31,11 +30,8 @@ _C.TASK.TYPE = 'semantic'
 # -------------------------------------------- Model related --------------------------------------------
 
 _C.MODEL = CN(new_allowed=True)
-# model encoder. 其范围包含Backbone以及其他自定义的组合
-_C.MODEL.ENCODER = ''    
-# model decoder.   
-_C.MODEL.DECODER = ''
-# model head
+_C.MODEL.BACKBONE = ''    
+_C.MODEL.NECK = ''
 _C.MODEL.HEAD = ''
 
 _C.MODEL.IN_CHANNEL = 3
@@ -57,8 +53,10 @@ _C.DATASET.VALIDSET.NAMES = ()
 _C.DATASET.TESTSET = CN(new_allowed=True)
 _C.DATASET.TESTSET.NAMES = ()
 
-# ----- Augment -----
+# -------------------------------------------- Augment related --------------------------------------------
 _C.AUGMENT = CN(new_allowed=True)
+
+
 
 # -------------------------------------------- Input related --------------------------------------------
 
@@ -70,7 +68,7 @@ _C.INPUT.STD = 1.0
 # -------------------------------------------- Loss related --------------------------------------------
 
 _C.LOSS = CN(new_allowed=True)
-_C.LOSS.NAME = ''
+_C.LOSS.TYPE = ()
 _C.LOSS.CLASS_BALANCE = False
 _C.LOSS.BALANCE_WEIGHTS = [1]
 _C.LOSS.USE_OHEM = False
@@ -96,6 +94,23 @@ _C.TRAIN.LR_SCHEDULER.NAME = ''
 
 _C.VALID = CN(new_allowed=True)
 _C.VALID.BATCH_SIZE_PER_GPU = 16
+
+# --------------------------------------------- Test related --------------------------------------------
+
+_C.TEST = CN(new_allowed=True)
+_C.TEST.TESTER = 'general'
+_C.TEST.END_EPOCH = 300
+
+
+_C.TEST.BATCH_SIZE_PER_GPU = 16
+_C.TEST.SHUFFLE = False
+
+_C.TEST.OPTIMIZER = CN(new_allowed=True)
+_C.TEST.OPTIMIZER.NAME = ''
+_C.TEST.OPTIMIZER.LR = 1e-4
+
+_C.TEST.LR_SCHEDULER = CN(new_allowed=True)
+_C.TEST.LR_SCHEDULER.NAME = ''
 
 # ------------------------------------------ Distributed related ------------------------------------------
 

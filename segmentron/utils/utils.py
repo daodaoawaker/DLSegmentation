@@ -5,25 +5,21 @@ import torch
 from segmentron.utils import distributed as dist
 
 
-
-def snake2pascal(string):
-    """ convert Snake case to Pascal case"""
-    return string.replace('_', ' ').title().replace(' ', '')
-    
 def make_if_not_exists(dir):
+    """Utility functions ralted to directory."""
     if not os.path.exists(dir):
         os.makedirs(dir)
 
+
 def seed_for_all_rng(seed=None):
     """
-    Set seed for random number generater in torch, numpy and python
-
+    Set the seed of random number generater for torch | numpy | python.
     """
     if not seed:
         pass
 
-    random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
+    random.seed(seed)
     np.random.seed(seed)
     rng = torch.manual_seed(seed)
     torch.set_rng_state(rng.get_state())
@@ -32,8 +28,7 @@ def seed_for_all_rng(seed=None):
 
 def reduce_tensor(inp):
     """
-    Reduce the loss from all processes so that 
-    process with rank 0 has the averaged results.
+    Reduce the loss from all processes so that process with rank 0 has the averaged results.
     """
     world_size = dist.get_world_size()
     if world_size < 2:
@@ -44,8 +39,8 @@ def reduce_tensor(inp):
     return reduced_inp / world_size
 
 
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
+class AverageMeter:
+    """Computes and stores the average and current value."""
 
     def __init__(self):
         self.initialized = False

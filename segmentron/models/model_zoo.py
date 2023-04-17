@@ -1,33 +1,38 @@
-from enum import Enum
 import torch
 import torch.nn as nn
 
-from segmentron.models.utils import get_backbone, get_neck, get_head
+from segmentron.models.build import (
+    get_backbone,
+    get_neck,
+    get_head
+)
 from segmentron.config import Cfg
-
 
 
 class ModelBuilder(nn.Module):
     def __init__(self,):
         super(ModelBuilder, self).__init__()
 
-        self.encoder = self._get_backbone()
-        self.decoder = self._get_neck()
+        self.backbone = self._get_backbone()
+        self.neck = self._get_neck()
         self.head = self._get_head()
 
     def _get_backbone(self):
-        self.encoder_name = Cfg.MODEL.ENCODER.lower()
         self.in_ch = Cfg.MODEL.IN_CHANNEL
         self.num_class = Cfg.MODEL.NUM_CLASSES
+        self.backbone_name = Cfg.MODEL.BACKBONE.lower()
+        if self.backbone_name:
+            return get_backbone(self.backbone_name, in_ch=self.in_ch, num_class=self.num_class)
 
-        if self.encoder_name:
-            return get_backbone(self.encoder_name, in_ch=self.in_ch, num_class=self.num_class)
         return None
 
     def _get_neck(self):
-        self.decoder_name = Cfg.MODEL.DECODER.lower()
         kwargs = Cfg.MODEL
-        return get_neck(self.decoder_name, **kwargs)
+        self.neck_name = Cfg.MODEL.NECK.lower()
+        if self.neck_name:
+            return get_neck(self.neck_name, **kwargs)
+
+        return None
 
     def _get_head(self):
         self.head_name = Cfg.MODEL.HEAD.lower()
@@ -37,11 +42,10 @@ class ModelBuilder(nn.Module):
         return None
 
     def forward(self, x):
-        if self.encoder:
-            x = self.encoder(x)
-            
-        x = self.decoder(x)
-
+        if self.backbone:
+            x = self.backbone(x)
+        if self.neck:
+            x = self.neck(x)
         if self.head:
             x = self.head(x)
 
@@ -51,7 +55,6 @@ class ModelBuilder(nn.Module):
 
 
 def create_model():
-        model = ModelBuilder()
-
-        return model
+    '''Build model.'''
+    return ModelBuilder()
 

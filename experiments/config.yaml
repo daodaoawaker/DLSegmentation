@@ -2,7 +2,8 @@
 
 # --------------------------- MODEL ---------------------------
 MODEL:
-  DECODER: CSM
+  BACKBONE: MobilenetV2
+  NECK: RefineNet
   INPUT_EDGE: true
   WITH_ENERGY: true
   NUM_CLASSES: 3
@@ -32,4 +33,4 @@ AUGMENT:
   BRIGHTNESS_MODE: "normal" #[dark, normal, bright]
 
 TRAIN:
-  TRAINER: Ego2Hands
+  TRAINER: general
