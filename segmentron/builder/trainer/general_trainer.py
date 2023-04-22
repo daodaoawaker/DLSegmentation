@@ -8,10 +8,10 @@ from segmentron.config import Cfg
 
 
 class GeneralTrainer(BaseTrainer):
-    """Model Trainer"""
+    """Model Trainer."""
 
-    def __init__(self, local_rank, args):
-        super(GeneralTrainer, self).__init__(local_rank, args)
+    def __init__(self, args):
+        super(GeneralTrainer, self).__init__(args)
         self.cfg = Cfg
         self.cur_epoch = self.last_epoch
         self.epochs = self.end_epoch - self.last_epoch

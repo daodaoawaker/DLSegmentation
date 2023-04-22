@@ -33,10 +33,10 @@ class DataloaderBuilder:
 
         return self.valid_loader
 
-    def test_dataloader(self,):
+    def calib_dataloader(self,):
         pass
 
-    def cali_dataloader(self,):
+    def test_dataloader(self,):
         pass
 
     def _get_dataset(self, mode='Train'):
